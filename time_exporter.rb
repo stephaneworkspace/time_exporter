@@ -22,7 +22,7 @@ if response.code == 200
 
       styles = sheet.workbook.styles
       datetime_style = styles.add_style(format_code: "dd/mm/yyyy hh:mm:ss")
-      decimal_style = styles.add_style(format_code: "0.000")
+      decimal_style = styles.add_style(format_code: "0.00")
 
       sessions.each do |s|
         started_at = Time.parse(s["started_at"])
@@ -41,6 +41,14 @@ if response.code == 200
         last_row_index = sheet.rows.size
         sheet.rows.last.cells[4].value = "=(C#{last_row_index}-B#{last_row_index})*24/8.5"
       end
+
+      # Add total rows
+      total_row_index = sheet.rows.size + 1
+      sheet.add_row ["", "", "", "", nil, "Total jours"]
+      sheet.rows.last.cells[4].value = "=SUM(E2:E#{total_row_index - 1})"
+
+      sheet.add_row ["", "", "", "", nil, "Total heures"]
+      sheet.rows.last.cells[4].value = "=E#{total_row_index}*8.5"
     end
     p.serialize("sessions.xlsx")
   end
