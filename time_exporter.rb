@@ -4,6 +4,7 @@ require 'httparty'
 require 'axlsx'
 require 'json'
 require 'time'
+require 'tzinfo'
 
 TOKEN = File.read("token.txt").strip
 
@@ -50,8 +51,9 @@ def generate_excel_from_sessions(response, category_name)
           sheet.add_row ["ID", "Début", "Fin", "Durée", "Jour travail", "Commentaire"], style: [header_style] * 6
 
           sessions.each do |s|
-            started_at = Time.parse(s["started_at"])
-            ended_at = Time.parse(s["ended_at"])
+            tz = TZInfo::Timezone.get('Europe/Zurich')
+            started_at = tz.utc_to_local(Time.parse(s["started_at"]).utc)
+            ended_at = tz.utc_to_local(Time.parse(s["ended_at"]).utc)
             duration_seconds = ended_at - started_at
             duration = Time.at(duration_seconds).utc.strftime("%H:%M:%S")
             sheet.add_row [
