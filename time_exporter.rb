@@ -1,6 +1,7 @@
 require 'httparty'
 require 'axlsx'
 require 'json'
+require 'time'
 
 TOKEN = File.read("token.txt").strip
 
@@ -17,17 +18,18 @@ if response.code == 200
 
   Axlsx::Package.new do |p|
     p.workbook.add_worksheet(name: '5') do |sheet|
-      sheet.add_row ["ID", "Début", "Fin", "Commentaire", "Créé à", "Mis à jour à"]
+      sheet.add_row ["ID", "Début", "Fin", "Commentaire"]
+
+      styles = sheet.workbook.styles
+      datetime_style = styles.add_style(format_code: "dd/mm/yyyy hh:mm:ss")
 
       sessions.each do |s|
         sheet.add_row [
                         s["id"],
-                        s["started_at"],
-                        s["ended_at"],
-                        s["commentaire"],
-                        s["created_at"],
-                        s["updated_at"]
-                      ]
+                        Time.parse(s["started_at"]),
+                        Time.parse(s["ended_at"]),
+                        s["commentaire"]
+                      ], style: [nil, datetime_style, datetime_style, nil]
       end
     end
     p.serialize("sessions.xlsx")
