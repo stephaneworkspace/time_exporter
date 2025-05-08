@@ -6,7 +6,7 @@ require 'time'
 TOKEN = File.read("token.txt").strip
 
 response = HTTParty.get(
-  'https://time.bressani.dev:3443/api/sessions',
+  'https://time.bressani.dev:3443/api/sessions?project_id=5',
   headers: {
     'Authorization' => "Bearer #{TOKEN}",
     'Accept' => '*/*'
