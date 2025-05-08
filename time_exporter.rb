@@ -18,11 +18,29 @@ if response.code == 200
 
   Axlsx::Package.new do |p|
     p.workbook.add_worksheet(name: '5') do |sheet|
-      sheet.add_row ["ID", "Début", "Fin", "Durée", "Jour travail", "Commentaire"]
-
       styles = sheet.workbook.styles
-      datetime_style = styles.add_style(format_code: "dd/mm/yyyy hh:mm:ss")
-      decimal_style = styles.add_style(format_code: "0.00")
+      datetime_bordered_style = styles.add_style(
+        format_code: "dd/mm/yyyy hh:mm:ss",
+        border: { style: :thin, color: "000000", edges: [:top, :bottom, :left, :right] }
+      )
+      decimal_bordered_style = styles.add_style(
+        format_code: "0.00",
+        border: { style: :thin, color: "000000", edges: [:top, :bottom, :left, :right] }
+      )
+      bordered_style = styles.add_style(
+        border: { style: :thin, color: "000000", edges: [:top, :bottom, :left, :right] }
+      )
+      header_style = styles.add_style(
+        b: true,
+        border: {
+          style: :medium,
+          color: "000000",
+          edges: [:top, :bottom, :left, :right]
+        },
+        alignment: { horizontal: :center }
+      )
+
+      sheet.add_row ["ID", "Début", "Fin", "Durée", "Jour travail", "Commentaire"], style: [header_style] * 6
 
       sessions.each do |s|
         started_at = Time.parse(s["started_at"])
@@ -36,7 +54,7 @@ if response.code == 200
           duration,
           nil,  # Placeholder for formula
           s["commentaire"]
-        ], style: [nil, datetime_style, datetime_style, nil, decimal_style, nil]
+        ], style: [bordered_style, datetime_bordered_style, datetime_bordered_style, bordered_style, decimal_bordered_style, bordered_style]
 
         last_row_index = sheet.rows.size
         sheet.rows.last.cells[4].value = "=(C#{last_row_index}-B#{last_row_index})*24/8.5"
@@ -44,10 +62,10 @@ if response.code == 200
 
       # Add total rows
       total_row_index = sheet.rows.size + 1
-      sheet.add_row ["", "", "", "", nil, "Total jours"]
+      sheet.add_row ["", "", "", "", nil, "Total jours"], style: [bordered_style]*6
       sheet.rows.last.cells[4].value = "=SUM(E2:E#{total_row_index - 1})"
 
-      sheet.add_row ["", "", "", "", nil, "Total heures"]
+      sheet.add_row ["", "", "", "", nil, "Total heures"], style: [bordered_style]*6
       sheet.rows.last.cells[4].value = "=E#{total_row_index}*8.5"
     end
     p.serialize("sessions.xlsx")
