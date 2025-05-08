@@ -18,10 +18,11 @@ if response.code == 200
 
   Axlsx::Package.new do |p|
     p.workbook.add_worksheet(name: '5') do |sheet|
-      sheet.add_row ["ID", "Début", "Fin", "Durée", "Commentaire"]
+      sheet.add_row ["ID", "Début", "Fin", "Durée", "Jour travail", "Commentaire"]
 
       styles = sheet.workbook.styles
       datetime_style = styles.add_style(format_code: "dd/mm/yyyy hh:mm:ss")
+      decimal_style = styles.add_style(format_code: "0.000")
 
       sessions.each do |s|
         started_at = Time.parse(s["started_at"])
@@ -33,8 +34,12 @@ if response.code == 200
           started_at,
           ended_at,
           duration,
+          nil,  # Placeholder for formula
           s["commentaire"]
-        ], style: [nil, datetime_style, datetime_style, nil, nil]
+        ], style: [nil, datetime_style, datetime_style, nil, decimal_style, nil]
+
+        last_row_index = sheet.rows.size
+        sheet.rows.last.cells[4].value = "=(C#{last_row_index}-B#{last_row_index})*24/8.5"
       end
     end
     p.serialize("sessions.xlsx")
