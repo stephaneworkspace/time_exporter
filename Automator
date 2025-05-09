@@ -1,5 +1,2 @@
 cd /Users/stephane/Code/ruby/ref/time_exporter
-export PATH="$HOME/.rbenv/shims:$PATH"
-export GEM_HOME="$HOME/.gem"
-export GEM_PATH="$HOME/.gem"
-bundle install --quiet
+/Users/stephane/.rbenv/shims/ruby time_exporter.rb
